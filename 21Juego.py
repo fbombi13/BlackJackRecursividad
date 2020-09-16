@@ -10,92 +10,82 @@ def valor_carta(carta):
         return int(carta)
 
 
-class Jugador:
-    def __init__(self, nombre):
-        self.nombre = nombre
-        self.cartas_jugador = []
+def devuelve_carta(cartas):
+    return cartas[Random().randint(0, len(cartas) - 1)]
 
 
-class Ventiuna:
+def generar_baraja(cartas):
+    if len(cartas) < 52:
+        return generar_baraja(cartas + cartas)
+    else:
+        return cartas
 
-    def __init__(self):
-        self.cartas = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
-        self.baraja = []
-        self.generar_baraja()
-        self.jugador = Jugador(input("Ingrese Nombre: "))
-        self.maquina = Jugador("Maquina")
 
-    def generar_baraja(self):
-        i = 0
-        while i < 4:
-            self.baraja += self.cartas
-            i += 1
-
-    def sumar_cartas(self, cartas_jugador):
-        cartas_jugador.count("A")
-        if cartas_jugador.count("A") == 0:
-            return self.sumar_cartas_enteras(cartas_jugador)
+def sumar_cartas(cartas_jugador):
+    cartas_jugador.count("A")
+    if cartas_jugador.count("A") == 0:
+        return sumar_cartas_enteras(cartas_jugador)
+    else:
+        if sumar_cartas_enteras(cartas_jugador) <= 10:
+            return sumar_cartas_enteras(cartas_jugador) + 11 + (cartas_jugador.count("A") - 1)
         else:
-            if self.sumar_cartas_enteras(cartas_jugador) <= 10:
-                return self.sumar_cartas_enteras(cartas_jugador) + 11 + (cartas_jugador.count("A") - 1)
+            return sumar_cartas_enteras(cartas_jugador) + (cartas_jugador.count("A"))
+
+
+def sumar_cartas_enteras(cartas):
+    if len(cartas) == 1:
+        return valor_carta(cartas[0])
+    else:
+        return valor_carta(cartas[0]) + sumar_cartas_enteras(cartas[1:])
+
+
+def iniciar(jugador, maquina, cartas):
+    print("Sus primeras dos cartas son: ")
+    jugador.append(devuelve_carta(cartas))
+    cartas.remove(jugador[-1])
+    jugador.append(devuelve_carta(cartas))
+    cartas.remove(jugador[-1])
+    print(jugador)
+    print("\nCarta del Crupier: ")
+    maquina.append(devuelve_carta(cartas))
+    cartas.remove(maquina[-1])
+    print(maquina)
+    jugar(jugador, maquina, cartas)
+
+
+def jugar(jugador, maquina, cartas):
+    if len(maquina) == 0 and len(jugador) == 0:
+        iniciar(jugador, maquina, cartas)
+    else:
+        crupier(True, jugador, maquina, cartas)
+
+
+def crupier(turno_jugador, jugador, maquina, cartas):
+    if turno_jugador:
+        print("\n\n-----------Turno Jugador------------\n\n")
+        if sumar_cartas(jugador) <= 21:
+            if input("Oprima P para plantar u otra para pedir carta ").lower() != "p":
+                jugador.append(devuelve_carta(cartas))
+                cartas.remove(jugador[-1])
+                print(jugador)
+                crupier(True, jugador, maquina, cartas)
             else:
-                return self.sumar_cartas_enteras(cartas_jugador) + (cartas_jugador.count("A"))
-
-    def sumar_cartas_enteras(self, cartas):
-        if len(cartas) == 1:
-            return valor_carta(cartas[0])
+                print("\n\n-----------Turno Maquina------------\n\n")
+                crupier(False, jugador, maquina, cartas)
         else:
-            return valor_carta(cartas[0]) + self.sumar_cartas_enteras(cartas[1:])
-
-    def devuelve_carta(self):
-        posicion = Random().randint(0, len(self.baraja) - 1)
-        carta = self.baraja[posicion]
-        self.baraja.remove(carta)
-        return carta
-
-    def iniciar(self):
-        print("Bienvenido " + self.jugador.nombre)
-        print("Sus primeras dos cartas son: ")
-        self.jugador.cartas_jugador.append(self.devuelve_carta())
-        self.jugador.cartas_jugador.append(self.devuelve_carta())
-        print(self.jugador.cartas_jugador)
-        print("\nCarta del Crupier: ")
-        self.maquina.cartas_jugador.append(self.devuelve_carta())
-        print(self.maquina.cartas_jugador)
-        self.jugar(self.jugador, self.maquina)
-
-    def jugar(self, jugador, maquina):
-        if len(maquina.cartas_jugador) == 0 and len(jugador.cartas_jugador) == 0:
-            self.iniciar()
+            print("\n\n\n------------------------------------\n Perdió  Jugador")
+    else:
+        maquina.append(devuelve_carta(cartas))
+        cartas.remove(maquina[-1])
+        print(maquina)
+        if sumar_cartas(jugador) <= sumar_cartas(maquina) <= 21:
+            print("Ganó la Maquina")
+        elif sumar_cartas(maquina) <= 21:
+            print("Ganando Jugador")
+            crupier(False, jugador, maquina, cartas)
         else:
-            print("\n\n-----------Turno Jugador------------\n\n")
-            self.crupier(True, jugador)
-
-    def crupier(self, turno_jugador, jugador):
-        if self.sumar_cartas(jugador.cartas_jugador) <= 21:
-
-            if turno_jugador:
-                if input("Oprima P para plantar u otra para pedir carta ").lower() != "p":
-                    jugador.cartas_jugador.append(self.devuelve_carta())
-                    print(jugador.cartas_jugador)
-                    self.jugador.cartas_jugador = jugador.cartas_jugador
-                    self.crupier(True, jugador)
-                else:
-                    print("\n\n-----------Turno Maquina------------\n\n")
-                    self.crupier(False, self.maquina)
-            else:
-                jugador.cartas_jugador.append(self.devuelve_carta())
-                print(jugador.cartas_jugador)
-                if self.sumar_cartas(self.jugador.cartas_jugador) <= self.sumar_cartas(jugador.cartas_jugador) <= 21:
-                    print("Ganó " + self.maquina.nombre)
-                    return
-                else:
-                    print("Ganando " + self.jugador.nombre)
-                self.crupier(False, jugador)
-        else:
-            print("\n\n\n------------------------------------\n Perdió   " + jugador.nombre)
+            print("Ganó Jugador")
 
 
-####### JUGAR
-ventiuna = Ventiuna()
-ventiuna.jugar(ventiuna.jugador, ventiuna.maquina)
+while input("\n\n Presione X para jugar y Q para salir ").lower() != "q":
+    jugar([], [], generar_baraja(["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]))
